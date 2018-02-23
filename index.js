@@ -6,9 +6,35 @@ const useragent = require('useragent');
 const express = require('express');
 const Webtask = require('webtask-tools');
 const app = express();
-const Mixpanel = require('mixpanel');
+const CWLogsWritable = require('cwlogs-writable');
+const uuid = require('uuid');
 const Request = require('request');
 const memoizer = require('lru-memoizer');
+
+function onError(err, logEvents, next) {
+  // Copied verbatim from `cwlogs-writable` documentation.
+  // Use built-in behavior if the error is not
+  // from a PutLogEvents action (logEvents will be null).
+  if (!logEvents) {
+    next(err);
+    return;
+  } 
+  // Requeue the log events after a delay,
+  // if the queue is small enough.
+  if (this.getQueueSize() < 100) {
+    setTimeout(function() {
+      // Pass the logEvents to the "next" callback
+      // so they are added back to the head of the queue.
+      next(logEvents);
+    }, 2000);
+  }
+  // Otherwise, log the events to the console
+  // and resume streaming.
+  else {
+    console.error('Failed to send logEvents: '+JSON.stringify(logEvents));
+    next();
+  }
+}
 
 function lastLogCheckpoint(req, res) {
   let ctx = req.webtaskContext;
@@ -28,14 +54,18 @@ function lastLogCheckpoint(req, res) {
     }
 
     // Create a new event logger
-    const Logger = Mixpanel.init(ctx.data.MIXPANEL_TOKEN, {
-      key: ctx.data.MIXPANEL_KEY
+    const Logger = new CWLogsWritable({
+      logGroupName: ctx.data.AWS_LOG_GROUP,
+      logStreamName: uuid.v4(),
+      // Options passed to the AWS.CloudWatchLogs service.
+      cloudWatchLogsOptions: {
+        // Change the AWS region as needed.
+	region: ctx.data.AWS_REGION, 
+	accessKeyId: ctx.data.AWS_ACCESS_KEY_ID,
+	secretAccessKey: ctx.data.AWS_SECRET_ACCESS_KEY
+      },
+      onError: onError
     });
-
-    Logger.error = function (err, context) {
-      // Handle errors here
-      console.log("error", err, "context", context);
-    };
 
     // Start the process.
     async.waterfall([
@@ -93,28 +123,10 @@ function lastLogCheckpoint(req, res) {
       (context, callback) => {
         console.log(`Sending ${context.logs.length}`);
         if (context.logs.length > 0) {
-          const now = Date.now();
-          const mixpanelEvents = context.logs.map(function (log) {
-            const eventName = logTypes[log.type].event;
-            // TODO - consider setting the time to date in the underlying log file?
-            // log.time = log.date;
-            log.time = now;
-            log.distinct_id = 'auth0-logs';
-            return {
-              event: eventName,
-              properties: log
-            };
-          });
-
-          // import all events at once
-          Logger.import_batch(mixpanelEvents, function(errorList) {
-            if (errorList && errorList.length > 0) {
-              console.log('Errors occurred sending logs to Mixpanel:', JSON.stringify(errorList));
-              return callback(errorList);
-            }
-            console.log('Upload complete.');
-            return callback(null, context);
-          });
+	  context.logs.map(function(logEntry){
+	    Logger.write(logEntry)
+	  });
+	  return callback(null, context);
         } else {
           // no logs, just callback
           console.log('No logs to upload - completed.');
