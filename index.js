@@ -63,8 +63,7 @@ function lastLogCheckpoint(req, res) {
 	region: ctx.data.AWS_REGION, 
 	accessKeyId: ctx.data.AWS_ACCESS_KEY_ID,
 	secretAccessKey: ctx.data.AWS_SECRET_ACCESS_KEY
-      },
-      onError: onError
+      }
     });
 
     // Start the process.
