@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/auth0/auth0-logs-to-mixpanel.git"
+    "url": "git@github.com:biobright/auth0-logs-to-cwlogs.git"
   },
-  "author": "richard.seldon@auth0.com",
+  "author": "dev@biobright.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/auth0/auth0-logs-to-mixpanel/issues"
+    "url": "https://github.com/biobright/auth0-logs-to-cwlogs/issues"
   },
-  "homepage": "https://github.com/auth0/auth0-logs-to-mixpanel#readme",
+  "homepage": "https://github.com/biobright/auth0-logs-to-cwlogs",
   "dependencies": {
     "async": "1.0.0",
     "cwlogs-writable": "^1.0.0",

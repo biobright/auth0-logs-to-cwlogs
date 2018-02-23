@@ -1,11 +1,11 @@
 {
-  "title": "Auth0 Logs to Mixpanel",
-  "name": "auth0-logs-to-mixpanel",
+  "title": "Auth0 Logs to CWLogs",
+  "name": "auth0-logs-to-cwlogs",
   "version": "1.4.0",
   "author": "auth0",
   "description": "This extension will take all of your Auth0 logs and export them to Mixpanel",
   "type": "cron",
-  "repository": "https://github.com/auth0/auth0-logs-to-mixpanel",
+  "repository": "https://github.com/biobright/auth0-logs-to-cwlogs",
   "keywords": [
     "auth0",
     "extension"
@@ -15,12 +15,20 @@
     "scopes": "read:logs"
   },
   "secrets": {
-    "MIXPANEL_TOKEN": {
-      "description": "Mixpanel Token - this is your Mixpanel Token for your mixpanel project",
+    "AWS_LOG_GROUP": {
+      "description": "Name of CWLogs Log Group",
       "required": true
     },
-    "MIXPANEL_KEY": {
-      "description": "Mixpanel Key - this is your Mixpanel Key for your mixpanel project",
+    "AWS_REGION":{
+      "description": "Typically us-east-1",
+      "required": true
+    },
+    "AWS_ACCESS_KEY_ID":{
+      "description": "AWS access key (NOT SECRET) of IAM user",
+      "required": true
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "AWS IAM user secret",
       "required": true,
       "type": "password"
     },
