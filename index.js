@@ -37,7 +37,7 @@ function onError(err, logEvents, next) {
 }
 
 function lastLogCheckpoint(req, res) {
-  console.log('BEGIN ------------- 1.0.3')
+  console.log('BEGIN ------------- 1.0.4')
   let ctx = req.webtaskContext;
   let required_settings = ['AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET', 'AWS_LOG_GROUP', 'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'];
   let missing_settings = required_settings.filter((setting) => !ctx.data[setting]);
@@ -124,6 +124,7 @@ function lastLogCheckpoint(req, res) {
         console.log(`Sending ${context.logs.length}`);
         if (context.logs.length > 0) {
 	  context.logs.map(function(logEntry){
+	    console.log(`Writing entry: ${logEntry}`)
 	    Logger.write(logEntry)
 	  });
 	  return callback(null, context);
