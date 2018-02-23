@@ -88,6 +88,7 @@ module.exports =
 	}
 
 	function lastLogCheckpoint(req, res) {
+	  console.log('BEGIN ------------- 1.0.3');
 	  var ctx = req.webtaskContext;
 	  var required_settings = ['AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET', 'AWS_LOG_GROUP', 'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'];
 	  var missing_settings = required_settings.filter(function (setting) {
